@@ -6,7 +6,7 @@ export const theme = {
   ...dark
 }
 
-# React Best Practices ⚛️
+# Good Practices in React ⚛️
 
 ---
 
@@ -18,7 +18,9 @@ export const theme = {
 
 - Easy to maintain
 - Data dependency and portability
-- Use react query hooks directly within the component
+  - Use react query hooks directly within the component
+- Don't reach for state for things that doesn't relate to the UI
+  - use refs instead for storing objects and other non-ui related things
 
 ---
 
@@ -170,7 +172,9 @@ function Counter() {
 
 ---
 
-## Keep query hook only responsible for managing server state
+## Keep query hook only responsible for managing server data
+
+Don't mix UI state with the server state in the same hook
 
 ---
 
@@ -182,7 +186,49 @@ function Counter() {
 
 UI vs server onSuccess
 
+Easier to reason about
+
 --- 
+
+```js
+// Server ---------
+export const useDeleteCustomChartMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation(
+    ({ orgId, chartId }: DeleteCustomChartRequest) => customChartApi.deleteCustomChart({ orgId, chartId }),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries('listCustomCharts');
+      },
+    },
+  );
+};
+```
+
+--
+
+```js
+// UI ------------
+  const handleConfirmDelete = () => {
+    if (graphIdToDelete) {
+      deleteChart(
+        { orgId, chartId: graphIdToDelete },
+        {
+          onSuccess: () => {
+            snackbar.openSuccessSnackbar('Graph deleted successfully!');
+          },
+          onError: () => {
+            snackbar.openErrorSnackbar('Could not delete graph!');
+          },
+        },
+      );
+    }
+  };
+
+```
+
+---
 
 ## Subscribe to only required UI data using selector API
 
@@ -219,6 +265,8 @@ export const useEmissionsDateBoundaryQuery = () =>
 
 ```
 ---
+
+## Naming conventions 
 
 # 4. Reducing bundle size
 
