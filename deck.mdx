@@ -6,15 +6,15 @@ export const theme = {
   ...dark
 }
 
-# React Best Practices
+# React Best Practices ⚛️
 
 ---
 
-## 1. State Management
+# 1. State Management
 
 ---
 
-### Co-locate state in components
+## Co-locate state in components
 
 - Easy to maintain
 - Data dependency and portability
@@ -22,7 +22,7 @@ export const theme = {
 
 ---
 
-### Avoid props drilling
+## Avoid props drilling
 
 - Becomes difficult to find: 
   - where data is initialized
@@ -33,7 +33,7 @@ export const theme = {
 
 ---
 
-### Context API
+## Context API
 - For things that are truly necessary deep in the react tree
 - Context doesn't have to be global
 - May lead to unnecessary re-renders if the provider component re-renders
@@ -74,7 +74,7 @@ function CountProvider(props) {
 
 ---
 
-### Derived state
+## Derived state
 
 ```jsx
 function Form() {
@@ -90,7 +90,7 @@ function Form() {
 
 ---
 
-### Don't mirror props in state
+## Don't mirror props in state
 
 - State is initialized only during first render
 - won't update with prop changes 
@@ -110,8 +110,6 @@ function TextInput({ value }) {
 ```
 ---
 
-### Don't mirror props in state
-
 ```jsx
 // Good practice: Props are used directly without mirroring in state ✅
 function TextInput({ value, onChange }) {
@@ -121,11 +119,11 @@ function TextInput({ value, onChange }) {
 ```
 ---
 
-## 2. Effects shouldn't lie about their dependencies 🪝
+# 2. Effects shouldn't lie about their dependencies 🪝
 
 ---
 
-###  A buggy effect 🐞
+##  A buggy effect 🐞
 
 ```jsx
 function CounterWithBug() {
@@ -138,9 +136,11 @@ function CounterWithBug() {
 }
 ```
 
+[Demo](https://codesandbox.io/s/counterwithbug-sqn37)
+
 --- 
 
-### Fixing the bug 
+## Fixing the bug 
 
 ```jsx
 function Counter() {
@@ -153,33 +153,38 @@ function Counter() {
   return <h1>Count is {count} </h1>;
 }
 ```
+
+[Demo](https://codesandbox.io/s/peaceful-wave-9uudg)
+
 ---
 
-### Trust eslint-plugin-react-hooks 
+## Trust eslint-plugin-react-hooks 
 
 [eslint-plugin-react-hooks](https://github.com/facebook/react/tree/main/packages/eslint-plugin-react-hooks)
 
----
-
-## 3. React query - async state management library
+[Why Effects Shouldn't lie about their dependency by Aman](https://amanexplains.com/why-effects-shouldn't-lie-about-their-dependencies/)
 
 ---
 
-### Keep query hook only responsible for managing server state
+# 3. React query - async state management library
 
 ---
 
-### You can use it multiple times within siblings components
+## Keep query hook only responsible for managing server state
 
 ---
 
-### Invalidate query after a mutation
+## You can use it multiple times within siblings components
+
+---
+
+## Invalidate query after a mutation
 
 UI vs server onSuccess
 
 --- 
 
-### Subscribe to only required UI data using selector API
+## Subscribe to only required UI data using selector API
 
 ```js
 // Using Selector API ⚙️
@@ -215,6 +220,12 @@ export const useEmissionsDateBoundaryQuery = () =>
 ```
 ---
 
-## 4. Reducing bundle size
+# 4. Reducing bundle size
 
 Code splitting using React lazy + Suspense
+
+[Lazy loading React components by Aman](https://amanexplains.com/lazy-loading-react-components-no-rocket-science/)
+
+---
+
+## Thank you 🙏
