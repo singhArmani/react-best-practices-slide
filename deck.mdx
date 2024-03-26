@@ -1,0 +1,220 @@
+import { comic, highlight, dark } from '@mdx-deck/themes'
+
+export const theme = {
+  ...comic,
+  ...highlight,
+  ...dark
+}
+
+# React Best Practices
+
+---
+
+## 1. State Management
+
+---
+
+### Co-locate state in components
+
+- Easy to maintain
+- Data dependency and portability
+- Use react query hooks directly within the component
+
+---
+
+### Avoid props drilling
+
+- Becomes difficult to find: 
+  - where data is initialized
+  - where it's updated, and 
+  - where it's used
+- hard to refactor and maintain
+- no reason to break things out prematurely
+
+---
+
+### Context API
+- For things that are truly necessary deep in the react tree
+- Context doesn't have to be global
+- May lead to unnecessary re-renders if the provider component re-renders
+
+---
+
+```jsx
+function CountProvider(props) {
+ const [count, setCount] = useState(0);
+
+ // Directly passing state values without useMemo 🛑
+ return (
+    <CountContext.Provider value={{ count, setCount }} {...props}>
+      {props.children}
+    </CountContext.Provider>
+ );
+}
+```
+
+---
+
+```jsx
+// Provider component with useMemo
+function CountProvider(props) {
+ const [count, setCount] = useState(0);
+
+ // Memoizing the context value ✅
+ const value = useMemo(() => ({ count, setCount }), [count]);  
+
+ return (
+    <CountContext.Provider value={value} {...props}>
+      {props.children}
+    </CountContext.Provider>
+ );
+} 
+```
+
+
+---
+
+### Derived state
+
+```jsx
+function Form() {
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+
+  /**
+   * No need to have this state variable here. 
+   * It can be derived from firstName and lastName
+   */
+  const [fullName, setFullName] = useState('');
+```
+
+---
+
+### Don't mirror props in state
+
+- State is initialized only during first render
+- won't update with prop changes 
+- no need to use useEffect to update state
+
+```jsx
+// Bad practice: Props are mirrored in state 🛑
+function TextInput({ value }) {
+ const [inputValue, setInputValue] = useState(value);
+
+ useEffect(() => {
+    setInputValue(value);
+ }, [value]);
+
+ return <input value={inputValue} onChange={e => setInputValue(e.target.value)} />;
+}
+```
+---
+
+### Don't mirror props in state
+
+```jsx
+// Good practice: Props are used directly without mirroring in state ✅
+function TextInput({ value, onChange }) {
+ return <input value={value} onChange={onChange} />;
+}
+
+```
+---
+
+## 2. Effects shouldn't lie about their dependencies 🪝
+
+---
+
+###  A buggy effect 🐞
+
+```jsx
+function CounterWithBug() {
+  const [count, setCount] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => setCount(count + 1), 1000);
+    return () => clearInterval(id);
+  }, []);
+  return <h1>Count is {count} </h1>;
+}
+```
+
+--- 
+
+### Fixing the bug 
+
+```jsx
+function Counter() {
+  const [count, setCount] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => setCount(count + 1), 1000);
+    return () => clearInterval(id);
+  }, [count]); // ✅ passing 'count' as dependency
+  // will render the correct value of count
+  return <h1>Count is {count} </h1>;
+}
+```
+---
+
+### Trust eslint-plugin-react-hooks 
+
+[eslint-plugin-react-hooks](https://github.com/facebook/react/tree/main/packages/eslint-plugin-react-hooks)
+
+---
+
+## 3. React query - async state management library
+
+---
+
+### Keep query hook only responsible for managing server state
+
+---
+
+### You can use it multiple times within siblings components
+
+---
+
+### Invalidate query after a mutation
+
+UI vs server onSuccess
+
+--- 
+
+### Subscribe to only required UI data using selector API
+
+```js
+// Using Selector API ⚙️
+export const useEmissionsBoundaryQuery = (select) => {
+  const { orgId } = useAppContext();
+  return useQuery({
+    queryKey: ['getEmissionsBoundary', orgId],
+    queryFn: () => emissionsApi.getEmissionBoundary({ orgId }),
+    enabled: !!orgId,
+    select,
+  });
+}; 
+```
+---
+
+```js
+// Selector to subscribe only to the emission boundary dates
+const getDates = ({ startDate, endDate }) => {
+  if (startDate && endDate) {
+    return {
+      startDate,
+      endDate,
+    };
+  }
+};
+```
+
+```js
+// using the selector here --
+export const useEmissionsDateBoundaryQuery = () =>
+  useEmissionsBoundaryQuery(getDates);
+
+```
+---
+
+## 4. Reducing bundle size
+
+Code splitting using React lazy + Suspense
